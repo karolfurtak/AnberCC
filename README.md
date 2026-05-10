@@ -240,13 +240,47 @@ Jeśli chcesz aby Claude od razu widział pliki sprawozdań, ustaw `CC_WORKDIR="
 
 ## Sterowanie
 
-Po uruchomieniu masz pełnoekranowy terminal. Wszystkie znaki idą do `claude`:
+Po uruchomieniu masz pełnoekranowy terminal. Wszystkie znaki idą do `claude` przez PTY. Możesz sterować równolegle **gamepadem konsoli** ORAZ **BT klawiaturą** — działają obok siebie.
 
-- **BT klawiatura** — pełna obsługa (litery, Enter, Backspace, strzałki, Ctrl+C, Ctrl+D)
-- **Page Up / Page Down** — scrollback historii
-- **Ctrl+C** — wysyła SIGINT do Claude (przerwij output)
-- **Ctrl+D** — zamknij sesję / wyjdź
-- **Esc dwukrotnie / Ctrl+\** — wyjście awaryjne
+### Gamepad konsoli
+
+| Element | Akcja w terminalu Claude |
+|---|---|
+| **D-pad ↑/↓/←/→** | Strzałki ↑↓←→ (nawigacja w prompt history Claude, edycja linii) |
+| **A** (BTN_SOUTH, code 304) | **Enter** — wyślij polecenie do Claude |
+| **B** (BTN_EAST, code 305) | **Escape** — anuluj pole edycji / cofnij |
+| **X** (BTN_NORTH, code 307) | **Tab** — autouzupełnianie ścieżek/komend Claude |
+| **L1** (BTN_TL, code 310) | **Page Up** — przewiń w górę o stronę |
+| **R1** (BTN_TR, code 311) | **Page Down** — przewiń w dół o stronę |
+| **SELECT** (BTN_SELECT, code 314) | **Ctrl+C** — przerwij bieżącą operację Claude |
+| **Prawy analog ↑** | **Scroll UP** — przewijanie historii terminala (scrollback do 500 linii) |
+| **Prawy analog ↓** | **Scroll DOWN** — powrót do bieżącej linii |
+
+> **Analog scroll:** trzymaj prawy analog w górę żeby scrollować view. Powtarza się co 150 ms — szybkie ślizganie po długich outputach Claude (np. listing setek plików, długie sprawozdania). Strefa nieczułości (deadzone) 1200 — drobne ruchy ignorowane.
+
+### BT klawiatura
+
+| Klawisz | Akcja |
+|---|---|
+| **Litery / cyfry / symbole** | Pisane wprost do Claude (z obsługą Shift, AltGr, polskich znaków) |
+| **Enter** | Wyślij linię |
+| **Backspace** | Usuń znak |
+| **Strzałki ↑↓←→** | Nawigacja edycji / prompt history |
+| **Tab** | Autouzupełnianie |
+| **Page Up / Page Down** | Scrollback historii |
+| **Ctrl+C** | Przerwij Claude (SIGINT) |
+| **Ctrl+D** | Zakończ sesję (EOF) — Claude wyjdzie, AnberCC też się zamknie |
+| **Ctrl+L** | Wyczyść ekran |
+| **Ctrl+A / Ctrl+E** | Początek / koniec linii |
+| **Ctrl+W** | Usuń słowo wstecz |
+| **Esc** dwukrotnie | Wyjście awaryjne (jeśli sesja zawiśnie) |
+
+### Tipy praktyczne
+
+- **Wpisywanie po polsku** — BT klawiatura z układem PL działa od razu (SDL_TextInput honoruje system layout). Jeśli klawiatura ma układ EN, polskie znaki zrobisz przez AltGr+a/e/o/s/n/c/x/z/l (typowy mac/PC układ "Polish programmers")
+- **Skopiowanie outputu** — AnberCC nie ma kopiowania do clipboard (brak X11). Workaround: scrollback przez analog do interesującego fragmentu, potem zrób screenshot przez SSH (`/dev/fb0` → PNG)
+- **Resetowanie sesji** — `Ctrl+C` × 2 + `clear` (Ctrl+L) szybciej niż restart całego AnberCC
+- **Długie polecenia** — pisz na BT KB (klawiatura), wysyłaj A na gamepadzie (jak Enter) — wygodniej niż reach do Enter na klawiaturze trzymając konsolę w obu rękach
 
 ## Logi
 
