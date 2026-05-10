@@ -217,10 +217,10 @@ def pick_workdir(renderer, start: str = '/root') -> str | None:
     last_analog_t = 0
     analog_y = 0       # ostatnia wartość prawego analoga Y (ABS code 3)
     REPEAT_MS = 150
-    ANALOG_DEADZONE = 1200
-    ANALOG_MAX      = 22000  # próg saturacji (analog Anbernica nie zawsze dochodzi do 32k)
+    ANALOG_DEADZONE = 400    # ~10% z 4096 (analog Anbernica RG40XX V ma zakres ±4096)
+    ANALOG_MAX      = 4096   # natywny zakres analoga
     ANALOG_SLOW_MS  = 200    # przy progu deadzone
-    ANALOG_FAST_MS  = 20     # przy maksymalnym wychyleniu — szybciej niż dawne 60ms
+    ANALOG_FAST_MS  = 20     # przy maksymalnym wychyleniu
 
     try:
         while True:
@@ -243,7 +243,7 @@ def pick_workdir(renderer, start: str = '/root') -> str | None:
                                     collapse_current(); need_render = True
                             elif e.type == EV_ABS:
                                 ms = sdl2.SDL_GetTicks()
-                                if e.code == 3:                    # prawy analog Y
+                                if e.code == 3:                    # lewy analog Y (RG40XX V)
                                     analog_y = e.value
                                 elif e.code == 17:                 # D-pad Y
                                     if ms - last_dpad_t < REPEAT_MS:
