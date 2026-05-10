@@ -199,6 +199,45 @@ Skrypt:
 
 Po instalacji **AnberCC** pojawi się w App Center na konsoli. Uruchom, sparuj BT klawiaturę (jeśli nie sparowana), pisz `>>> ` jak w zwykłym terminalu.
 
+## Katalog roboczy Claude Code (cwd)
+
+AnberCC odpala `claude` przez `os.execve` w PTY — sesja **dziedziczy katalog roboczy** od launchera. Standardowo:
+
+- **Launcher (`AnberCC.sh`)** robi `cd "$CC_WORKDIR"` przed startem Pythona, gdzie domyślnie `CC_WORKDIR=/root` (HOME)
+- Z tego katalogu `claude` startuje sesję — domyślny prompt pokazuje `~`
+- Claude czyta `~/.claude/CLAUDE.md` (jeśli istnieje) — możesz tam zapisać własne instrukcje globalne
+- Komendy `Read`, `Glob`, `Bash` operują z tego cwd jako bazy
+
+### Zmiana katalogu roboczego
+
+**Stała zmiana** — edytuj `AnberCC.sh`:
+```bash
+# Przykład: zawsze otwiera w katalogu sprawozdań
+CC_WORKDIR="/mnt/data/sprawozdania"
+```
+
+**Tymczasowa** — z poziomu sesji Claude Code w AnberCC po prostu:
+```
+> użyj Bash żeby cd /mnt/data/projekt-x i potem przeczytaj README
+```
+
+Claude wykona `cd` w swojej Bash sesji.
+
+**Per-uruchomienie z SSH** — możesz odpalić AnberCC.sh z dowolnym katalogiem:
+```bash
+ssh root@<IP-konsoli> "CC_WORKDIR=/mnt/data/sprawozdania /mnt/mmc/Roms/APPS/AnberCC.sh"
+```
+*(Ale wtedy SDL nie wystartuje — apka SDL musi działać na lokalnym DRM, nie zdalnie. Używaj edycji `AnberCC.sh` zamiast.)*
+
+### Co Claude widzi w `/root`
+
+Domyślnie:
+- `/root/.claude/credentials.json` — token OAuth (Claude Code czyta sam, ty nie ruszaj)
+- `/root/.claude/CLAUDE.md` — twoje globalne instrukcje (jeśli utworzysz)
+- nic innego specjalnego
+
+Jeśli chcesz aby Claude od razu widział pliki sprawozdań, ustaw `CC_WORKDIR="/mnt/data/sprawozdania"` w launcherze. Jeśli wolisz żeby wybrał Claude sam — zostaw `/root` i powiedz mu w sesji "popracuj nad projektem w /mnt/data/sprawozdania/projekty/lab-3" — Claude przeskoczy.
+
 ## Sterowanie
 
 Po uruchomieniu masz pełnoekranowy terminal. Wszystkie znaki idą do `claude`:
