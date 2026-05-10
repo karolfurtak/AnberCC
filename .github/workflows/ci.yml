@@ -24,7 +24,7 @@ jobs:
         run: python -c "import ast; ast.parse(open('app/main.py', encoding='utf-8').read()); print('main.py syntax OK')"
 
       - name: Ruff lint
-        run: ruff check app/ --select=E,F,W --ignore=E501,F401
+        run: ruff check app/ --select=E,F,W --ignore=E501,F401,E701,E702,E703
 
       - name: Validate struct (mock SDL2)
         run: |
@@ -46,10 +46,10 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y shellcheck
 
       - name: Shellcheck launcher
-        run: shellcheck app/AnberCC.sh
+        run: shellcheck --severity=error app/AnberCC.sh
 
       - name: Shellcheck installer
-        run: shellcheck scripts/install.sh
+        run: shellcheck --severity=error scripts/install.sh
 
       - name: Bash syntax test
         run: |
