@@ -153,7 +153,7 @@ def pick_workdir(renderer, start: str = '/root') -> str | None:
         # legenda
         d.line([(0, H - 28), (W, H - 28)], fill=SEP, width=1)
         d.text((8, H - 22),
-               '↑↓=ruch  →=rozwiń  ←=zwiń  A/START=wybierz  X=ukryte  MENU=anuluj',
+               '↑↓=ruch (analog=szybko)  →=rozwiń  ←=zwiń  A/START=wybierz  X=ukryte  MENU=anuluj',
                font=font_s, fill=DIM)
 
         raw = img.tobytes()
@@ -214,7 +214,11 @@ def pick_workdir(renderer, start: str = '/root') -> str | None:
     render_tree()
     ev = sdl2.SDL_Event()
     last_dpad_t = 0
+    last_analog_t = 0
+    analog_y = 0       # ostatnia wartość prawego analoga Y (ABS code 3)
     REPEAT_MS = 150
+    ANALOG_DEADZONE = 1200
+    ANALOG_FAST_MS  = 60   # szybki auto-repeat gdy analog wychylony
 
     try:
         while True:
@@ -237,20 +241,32 @@ def pick_workdir(renderer, start: str = '/root') -> str | None:
                                     collapse_current(); need_render = True
                             elif e.type == EV_ABS:
                                 ms = sdl2.SDL_GetTicks()
-                                if ms - last_dpad_t < REPEAT_MS:
-                                    continue
-                                if e.code == 17:                   # D-pad Y
+                                if e.code == 3:                    # prawy analog Y
+                                    analog_y = e.value
+                                elif e.code == 17:                 # D-pad Y
+                                    if ms - last_dpad_t < REPEAT_MS:
+                                        continue
                                     if e.value == -1:
                                         move(-1); need_render = True; last_dpad_t = ms
                                     elif e.value == 1:
                                         move(1); need_render = True; last_dpad_t = ms
                                 elif e.code == 16:                 # D-pad X
+                                    if ms - last_dpad_t < REPEAT_MS:
+                                        continue
                                     if e.value == 1:               # right = expand
                                         expand_current(); need_render = True; last_dpad_t = ms
                                     elif e.value == -1:            # left = collapse
                                         collapse_current(); need_render = True; last_dpad_t = ms
                     except OSError:
                         pass
+
+            # Analog stick — szybkie scrollowanie (60ms repeat, vs 150ms dla D-pad)
+            if abs(analog_y) > ANALOG_DEADZONE:
+                ms_now = sdl2.SDL_GetTicks()
+                if ms_now - last_analog_t > ANALOG_FAST_MS:
+                    move(-1 if analog_y < 0 else 1)
+                    need_render = True
+                    last_analog_t = ms_now
 
             while sdl2.SDL_PollEvent(ctypes.byref(ev)):
                 if ev.type == sdl2.SDL_KEYDOWN:
