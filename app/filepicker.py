@@ -218,7 +218,9 @@ def pick_workdir(renderer, start: str = '/root') -> str | None:
     analog_y = 0       # ostatnia wartość prawego analoga Y (ABS code 3)
     REPEAT_MS = 150
     ANALOG_DEADZONE = 1200
-    ANALOG_FAST_MS  = 60   # szybki auto-repeat gdy analog wychylony
+    ANALOG_MAX      = 32000
+    ANALOG_SLOW_MS  = 200  # przy progu deadzone
+    ANALOG_FAST_MS  = 30   # przy maksymalnym wychyleniu
 
     try:
         while True:
@@ -260,10 +262,16 @@ def pick_workdir(renderer, start: str = '/root') -> str | None:
                     except OSError:
                         pass
 
-            # Analog stick — szybkie scrollowanie (60ms repeat, vs 150ms dla D-pad)
-            if abs(analog_y) > ANALOG_DEADZONE:
+            # Analog stick — prędkość proporcjonalna do wychylenia
+            # (lekko = wolno, mocno = bardzo szybko)
+            ay = abs(analog_y)
+            if ay > ANALOG_DEADZONE:
+                # 0..1 wychylenie ponad deadzone, znormalizowane
+                deflect = min(1.0, (ay - ANALOG_DEADZONE) / max(1, ANALOG_MAX - ANALOG_DEADZONE))
+                # interp delay: deadzone→SLOW, max→FAST
+                repeat_ms = int(ANALOG_SLOW_MS - deflect * (ANALOG_SLOW_MS - ANALOG_FAST_MS))
                 ms_now = sdl2.SDL_GetTicks()
-                if ms_now - last_analog_t > ANALOG_FAST_MS:
+                if ms_now - last_analog_t > repeat_ms:
                     move(-1 if analog_y < 0 else 1)
                     need_render = True
                     last_analog_t = ms_now
