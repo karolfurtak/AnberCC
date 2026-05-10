@@ -218,9 +218,9 @@ def pick_workdir(renderer, start: str = '/root') -> str | None:
     analog_y = 0       # ostatnia wartość prawego analoga Y (ABS code 3)
     REPEAT_MS = 150
     ANALOG_DEADZONE = 1200
-    ANALOG_MAX      = 32000
-    ANALOG_SLOW_MS  = 200  # przy progu deadzone
-    ANALOG_FAST_MS  = 30   # przy maksymalnym wychyleniu
+    ANALOG_MAX      = 22000  # próg saturacji (analog Anbernica nie zawsze dochodzi do 32k)
+    ANALOG_SLOW_MS  = 200    # przy progu deadzone
+    ANALOG_FAST_MS  = 20     # przy maksymalnym wychyleniu — szybciej niż dawne 60ms
 
     try:
         while True:
