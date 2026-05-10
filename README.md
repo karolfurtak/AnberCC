@@ -199,13 +199,48 @@ Skrypt:
 
 Po instalacji **AnberCC** pojawi się w App Center na konsoli. Uruchom, sparuj BT klawiaturę (jeśli nie sparowana), pisz `>>> ` jak w zwykłym terminalu.
 
+## Wybór katalogu roboczego — drzewiasty picker
+
+Po uruchomieniu AnberCC pokazuje **drzewo katalogów** od `/` z auto-rozwiniętą ścieżką do `/root` (lub `$CC_WORKDIR` jeśli ustawiony). Wybierasz katalog w którym Claude Code rozpocznie sesję.
+
+![Tree picker](screenshot-picker.png)
+
+**Sterowanie pickerem:**
+
+| Akcja | Gamepad | BT klawiatura |
+|---|---|---|
+| Ruch kursora ↑↓ | D-pad ↑↓ | strzałki ↑↓ |
+| Rozwiń gałąź | D-pad → | strzałka → |
+| Zwiń gałąź / przejdź do rodzica | D-pad ← | strzałka ← |
+| **Wybierz** zaznaczony katalog | **A** lub **START** | **Enter** |
+| Toggle ukrytych (.dotfiles) | X | — |
+| Anuluj (zamknij AnberCC) | MENU | Esc |
+
+Wskaźniki obok nazw:
+- `▸` — gałąź zwinięta (lub jeszcze niezbadana)
+- `▾` — gałąź rozwinięta
+- `·` — pusta (brak podkatalogów)
+
+Ścieżka aktualnie zaznaczonego katalogu pokazuje się pod tytułem (zielony tekst) — masz pewność co wybierasz przed naciśnięciem A.
+
+### Pomijanie pickera (auto-launch z konkretnego cwd)
+
+Jeśli zawsze chcesz startować od tego samego katalogu i nie widzieć pickera:
+
+```bash
+# w AnberCC.sh dodaj:
+export CC_SKIP_PICKER=1
+export CC_WORKDIR="/mnt/data/sprawozdania"
+```
+
+Wtedy AnberCC od razu odpala Claude w `CC_WORKDIR` bez pytania.
+
 ## Katalog roboczy Claude Code (cwd)
 
-AnberCC odpala `claude` przez `os.execve` w PTY — sesja **dziedziczy katalog roboczy** od launchera. Standardowo:
+AnberCC po wyborze w pickerze robi `os.chdir(picked)` przed `os.execve` PTY — sesja Claude **dziedziczy** ten katalog. Standardowo:
 
-- **Launcher (`AnberCC.sh`)** robi `cd "$CC_WORKDIR"` przed startem Pythona, gdzie domyślnie `CC_WORKDIR=/root` (HOME)
-- Z tego katalogu `claude` startuje sesję — domyślny prompt pokazuje `~`
-- Claude czyta `~/.claude/CLAUDE.md` (jeśli istnieje) — możesz tam zapisać własne instrukcje globalne
+- Wybierając w pickerze np. `/mnt/data/sprawozdania/projekty/lab-3` — Claude widzi pliki tego konkretnego projektu
+- Wybierając `/root` (HOME) — Claude czyta `~/.claude/CLAUDE.md` (Twoje globalne instrukcje, jeśli istnieją)
 - Komendy `Read`, `Glob`, `Bash` operują z tego cwd jako bazy
 
 ### Zmiana katalogu roboczego

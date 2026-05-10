@@ -262,6 +262,28 @@ def main():
         sdl2.SDL_Quit()
         return 1
 
+    # File picker przed startem Claude — wybór katalogu roboczego.
+    # Można wymusić skip podając CC_WORKDIR + CC_SKIP_PICKER=1 w env.
+    workdir = os.environ.get('CC_WORKDIR', '/root')
+    if not os.environ.get('CC_SKIP_PICKER'):
+        try:
+            from filepicker import pick_workdir
+            picked = pick_workdir(sdl_renderer, start=workdir)
+            if picked is None:
+                # MENU/ESC = anulowanie pickera = wyjście z apki
+                sdl2.SDL_DestroyRenderer(sdl_renderer)
+                sdl2.SDL_DestroyWindow(window)
+                sdl2.SDL_Quit()
+                return 0
+            workdir = picked
+        except Exception as e:
+            print(f'pick_workdir error: {e} — fallback do {workdir}', file=sys.stderr)
+
+    try:
+        os.chdir(workdir)
+    except Exception:
+        os.chdir('/root')
+
     font, char_w, char_h, ascent = make_font_and_metrics()
     cols = W // char_w
     rows = H // char_h
