@@ -327,6 +327,6 @@ MIT — patrz [LICENSE](LICENSE).
 
 ## Powiązane
 
-- [Anbernet](https://github.com/karolfurtak/Anbernet) — manager WiFi (D-pad + on-screen klawiatura)
+- [AnberNet](https://github.com/karolfurtak/AnberNet) — manager WiFi (D-pad + on-screen klawiatura)
 - AnberMon — monitor systemowy (CPU/RAM/Temp/Bat + wykresy + Discord activity)
 - AnbernBot — Discord bot z Claude Code do tworzenia sprawozdań
