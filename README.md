@@ -32,22 +32,85 @@ Tworzone i testowane na **stock Anbernic firmware build `20251225`**:
 
 Inne firmware (muOS, Knulli, garlicOS) — niesprawdzone.
 
-### Claude Code CLI
+### Claude Code CLI + logowanie
 
-Wymagany **claude** CLI z aktywną subskrypcją (tested z Claude Max). Instalacja na konsoli:
+Wymagany **claude** CLI z aktywną subskrypcją Anthropic (testowane z **Claude Max**, działa też z **Claude Pro** lub kluczem API).
+
+#### Krok 1: Zainstaluj Node.js (jeśli brakuje)
 
 ```bash
-# zainstaluj Node.js jeśli brakuje
 apt update && apt install -y nodejs npm
-
-# zainstaluj Claude Code globalnie
-npm install -g @anthropic-ai/claude-code
-
-# zaloguj się do Claude (jednorazowo, otworzy URL — wykonaj na komputerze i wklej kod)
-claude login
 ```
 
-Po zalogowaniu plik z tokenem zostanie zapisany w `/root/.claude/`. AnberCC odpala `python3 main.py` które spawnuje `claude` w PTY.
+#### Krok 2: Zainstaluj Claude Code
+
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+
+Sprawdź:
+```bash
+which claude       # /root/.local/bin/claude lub /usr/local/bin/claude
+claude --version
+```
+
+#### Krok 3: Zaloguj się — **rób to przez SSH, NIE z poziomu AnberCC**
+
+Logowanie wymaga otwarcia URL w przeglądarce. Najprościej:
+
+1. **Połącz się z konsolą po SSH z laptopa**:
+    ```bash
+    ssh root@<IP-konsoli>
+    ```
+
+2. **Uruchom logowanie**:
+    ```bash
+    claude /login
+    ```
+    (Claude Code wewnątrz interaktywnej sesji ma slash command `/login`. Możesz też wpisać `claude` żeby otworzyć sesję, potem `/login`).
+
+    Wybierz tryb logowania (np. `Claude Max account`, `Anthropic API key`, etc.).
+
+3. **Otwórz URL** który Claude wyświetli (długi link `https://claude.ai/...`) — wklej do przeglądarki na laptopie/telefonie. Zaloguj się do swojego konta Anthropic.
+
+4. **Skopiuj kod autoryzacyjny** z przeglądarki, wklej w terminalu SSH gdzie czeka prompt.
+
+5. **Zatwierdź** — Claude zapisze token OAuth w `/root/.claude/credentials.json`.
+
+#### Krok 4: Test
+
+```bash
+echo "powiedz hej" | claude -p
+```
+
+Powinieneś dostać krótką odpowiedź. Jeśli tak — AnberCC będzie działać natychmiast.
+
+#### Alternatywa: klucz API
+
+Jeśli wolisz nie używać OAuth (nie potrzebujesz subskrypcji Max), tylko klucza API:
+
+```bash
+echo 'export ANTHROPIC_API_KEY="sk-ant-..."' >> /root/.bashrc
+source /root/.bashrc
+```
+
+Następnie:
+```bash
+claude --bare -p "test"
+```
+
+> **Uwaga:** AnberCC domyślnie używa Claude Code w trybie OAuth (Max/Pro). Jeśli masz tylko klucz API, edytuj `app/main.py` żeby dodać `--bare` do polecenia spawn-ującego `claude`.
+
+#### Gdzie jest token?
+
+Po pierwszym `claude login` token OAuth znajduje się w `/root/.claude/`. NIE COMMITUJ tej ścieżki nigdzie — zawiera dane uwierzytelniające twojego konta Anthropic.
+
+```bash
+ls -la /root/.claude/
+# credentials.json — tu jest token, plik chroń
+```
+
+AnberCC odpala `python3 main.py` które spawnuje `claude` w PTY, dziedzicząc dostęp do `/root/.claude/`.
 
 ### System packages
 
