@@ -338,6 +338,13 @@ def main():
     analog_next = 0.0
     view_offset = 0
 
+    # POWER button → wygaszanie ekranu bez zamykania apki
+    try:
+        from power_screen import ScreenPowerToggle
+        screen_pwr = ScreenPowerToggle()
+    except Exception:
+        screen_pwr = None
+
     def write_pty(seq):
         nonlocal running
         try:
@@ -346,6 +353,14 @@ def main():
             running = False
 
     while running:
+        # POWER button — toggle ekranu (nie zamyka apki)
+        if screen_pwr is not None:
+            screen_pwr.poll()
+            screen_pwr.tick(sdl2.SDL_GetTicks())
+            if screen_pwr.is_off:
+                sdl2.SDL_Delay(50)
+                continue
+
         # Drain PTY
         while True:
             try:
@@ -443,6 +458,8 @@ def main():
         sdl2.SDL_Delay(10)
 
     print(f"EXIT: {exit_reason}", file=sys.stderr)
+    if screen_pwr is not None:
+        screen_pwr.restore()
     sdl2.SDL_StopTextInput()
     if gamepad_fd >= 0:
         try:

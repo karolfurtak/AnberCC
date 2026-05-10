@@ -211,6 +211,13 @@ def pick_workdir(renderer, start: str = '/root') -> str | None:
         visible = flatten(root)
         cursor = min(cursor, len(visible) - 1)
 
+    # POWER button → wygaszanie ekranu bez zamykania apki
+    try:
+        from power_screen import ScreenPowerToggle
+        screen_pwr = ScreenPowerToggle()
+    except Exception:
+        screen_pwr = None
+
     render_tree()
     ev = sdl2.SDL_Event()
     last_dpad_t = 0
@@ -225,6 +232,14 @@ def pick_workdir(renderer, start: str = '/root') -> str | None:
     try:
         while True:
             need_render = False
+
+            # POWER button — toggle ekranu (nie zamyka pickera)
+            if screen_pwr is not None:
+                screen_pwr.poll()
+                screen_pwr.tick(sdl2.SDL_GetTicks())
+                if screen_pwr.is_off:
+                    sdl2.SDL_Delay(50)
+                    continue
 
             if gp is not None:
                 if select.select([gp.fd], [], [], 0)[0]:
@@ -296,6 +311,8 @@ def pick_workdir(renderer, start: str = '/root') -> str | None:
                 render_tree()
             sdl2.SDL_Delay(20)
     finally:
+        if screen_pwr is not None:
+            screen_pwr.restore()
         if gp is not None:
             try: gp.ungrab()
             except Exception: pass
