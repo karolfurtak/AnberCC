@@ -1,6 +1,10 @@
 # AnberCC
 
+![CI](https://github.com/karolfurtak/AnberCC/actions/workflows/ci.yml/badge.svg)
+
 **Claude Code w kieszeni.** SDL2-owy emulator terminala dla **Anbernic RG40XX V**, który odpala interaktywną sesję `claude` (Claude Code CLI) bez potrzeby SSH z laptopa. Pełnoekranowy, sterowany BT klawiaturą.
+
+![AnberCC screenshot](screenshot.png)
 
 Dzięki niemu pracujesz z Claude Code wprost na konsoli — pisanie kodu, czytanie plików, używanie wszystkich narzędzi (Read, Write, Bash, Glob, Grep, Edit) — w trybie "in your hand".
 
@@ -18,8 +22,48 @@ Dzięki niemu pracujesz z Claude Code wprost na konsoli — pisanie kodu, czytan
 ### Hardware
 
 - **Anbernic RG40XX V** (Allwinner H700, 640×480 LCD landscape)
-- BT klawiatura sparowana (lub USB OTG keyboard) — bez niej nie wpiszesz nic do Claude
+- **Klawiatura Bluetooth** (LUB USB OTG keyboard) — **wymagana**, bez niej nie wpiszesz nic do Claude. Konsola sama nie ma klawiatury fizycznej.
 - Inne RG40-serii **mogą działać** — niesprawdzone
+
+> **Uwaga o BT klawiaturze:** AnberCC nie zawiera własnego on-screen keyboard. Klawiatura BT (lub USB OTG) jest **konieczna** do interakcji z Claude. Konsola RG40XX V ma BT 5.0 i wspiera HID — działa praktycznie każda nowoczesna klawiatura BT (Logitech, Lenovo, Anker, generyczne). Dla wygody w terenie polecam mini-klawiatury 60% lub składane.
+
+### Parowanie klawiatury BT na konsoli
+
+Konsolę paruje się raz, BlueZ pamięta urządzenie. Najprościej z poziomu SSH przy pierwszym setup'ie:
+
+```bash
+ssh root@<IP-konsoli>
+bluetoothctl
+```
+
+W shellu `bluetoothctl`:
+```
+power on
+agent on
+default-agent
+scan on
+```
+
+Włącz klawiaturę BT w trybie pairing (zwykle przytrzymanie kombinacji typu `Fn+P` lub przycisku Bluetooth). Po kilku sekundach w listingu pojawi się jej MAC, np. `[NEW] Device AA:BB:CC:DD:EE:FF Logitech K380`.
+
+```
+pair AA:BB:CC:DD:EE:FF
+trust AA:BB:CC:DD:EE:FF
+connect AA:BB:CC:DD:EE:FF
+quit
+```
+
+Po `connect` test: na konsoli powinieneś móc wpisywać litery (jeśli np. masz dmenu otwartą gdzieś gdzie wprowadzasz tekst).
+
+> **Niektóre klawiatury** (np. Logitech K380, Lenovo) używają **per-pair-mode rotation MAC** — przy pierwszym sparowaniu zapisują nowy MAC dla tego hosta. Jeśli już sparowałeś klawiaturę z laptopem/telefonem, na Anbernicu może mieć inny MAC. Naciśnij dłużej przycisk Fn+1/2/3 (zależy od modelu) żeby przełączyć "slot" pairing przed parowaniem z konsolą.
+
+Po sparowaniu klawiatura BT auto-łączy się przy każdym kolejnym uruchomieniu konsoli. Stan sprawdzisz przez:
+```bash
+bluetoothctl info AA:BB:CC:DD:EE:FF
+# Connected: yes/no
+```
+
+Jeśli nie auto-łączy: w `bluetoothctl` → `connect AA:BB:CC:DD:EE:FF` lub przełóż przełącznik BT na klawiaturze off/on.
 
 ### Firmware
 
