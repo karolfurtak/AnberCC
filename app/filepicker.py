@@ -220,7 +220,7 @@ def pick_workdir(renderer, start: str = '/root') -> str | None:
     ANALOG_DEADZONE = 400    # ~10% z 4096 (analog Anbernica RG40XX V ma zakres ±4096)
     ANALOG_MAX      = 4096   # natywny zakres analoga
     ANALOG_SLOW_MS  = 200    # przy progu deadzone
-    ANALOG_FAST_MS  = 20     # przy maksymalnym wychyleniu
+    ANALOG_FAST_MS  = 18     # przy maksymalnym wychyleniu (~55 poz/s)
 
     try:
         while True:
