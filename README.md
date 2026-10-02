@@ -323,7 +323,7 @@ Po uruchomieniu masz pełnoekranowy terminal. Wszystkie znaki idą do `claude` p
 
 ## Licencja
 
-MIT — patrz [LICENSE](LICENSE).
+Copyright (c) 2026 Karol Furtak. **Wszelkie prawa zastrzeżone.** Użycie komercyjne, kopiowanie, rozpowszechnianie i modyfikowanie wyłącznie za pisemną zgodą autora — szczegóły w pliku [LICENSE](LICENSE).
 
 ## Powiązane
 
